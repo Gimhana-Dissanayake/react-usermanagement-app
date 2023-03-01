@@ -15,5 +15,22 @@ interface User {
   token?: string;
   currentUsername?: string;
 }
+export const initUser: User = {
+  userId: "",
+  firstName: "",
+  lastName: "",
+  username: "",
+  email: "",
+  lastLoginDate: new Date(),
+  lastLoginDateDisplay: new Date(),
+  joinDate: new Date(),
+  profileImageUrl: "",
+  active: false,
+  notLocked: false,
+  role: "",
+  authorities: [],
+  token: "",
+  currentUsername: "",
+};
 
 export default User;

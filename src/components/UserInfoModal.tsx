@@ -1,6 +1,13 @@
+import moment from "moment";
 import React, { FC } from "react";
 import { Modal } from "react-bootstrap";
-import { FaLock, FaUnlock } from "react-icons/fa";
+import {
+  FaEnvelope,
+  FaLock,
+  FaPortrait,
+  FaShieldAlt,
+  FaUnlock,
+} from "react-icons/fa";
 import User from "../models/User";
 
 interface Props {
@@ -23,7 +30,9 @@ const UserInfoModal: FC<Props> = (props) => {
             data-dismiss="modal"
             aria-label="Close"
           >
-            <span aria-hidden="true">&times;</span>
+            <span aria-hidden="true" onClick={props.handleClose}>
+              &times;
+            </span>
           </button>
         </div>
         <div className="modal-body">
@@ -49,22 +58,33 @@ const UserInfoModal: FC<Props> = (props) => {
                       <h6 className="pt-sm-2 pb-1 mb-0 text-nowrap">
                         {props.user?.firstName} {props.user?.lastName}
                       </h6>
-                      <p className="mb-1">Username</p>
+                      <p className="mb-1">{props.user?.username}</p>
                       <div className="">
-                        Status:<span className="inline-block mr-2"></span>
-                        <span className="badge badge-success">Active</span>
-                        <span className="badge badge-danger">Inactive</span>
+                        <span className="mr-1">Status :</span>
+                        {props.user?.active ? (
+                          <span className="badge badge-success">Active</span>
+                        ) : (
+                          <span className="badge badge-danger">Inactive</span>
+                        )}
+                        <span className="inline-block mr-2"></span>
                       </div>
                       <div className="text-muted">
-                        <small>
+                        <small style={{ fontSize: 12 }}>
                           Last Login:{" "}
-                          {props.user?.lastLoginDateDisplay?.toString() || ""}
+                          {`${moment(
+                            props.user?.lastLoginDateDisplay || new Date()
+                          ).format("LLL")}`}
                         </small>
                       </div>
                     </div>
                     <div className="text-center text-sm-right">
                       <div className="text-muted">
-                        <small>Joined - date here</small>
+                        <div style={{ fontSize: 10 }}>
+                          Joined:{" "}
+                          {`${moment(props.user?.joinDate || new Date()).format(
+                            "ll"
+                          )}`}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -72,30 +92,30 @@ const UserInfoModal: FC<Props> = (props) => {
               </div>
               <ul className="list-group list-group-flush">
                 <li className="list-group-item"></li>
-                <li className="list-group-item">
-                  <i className="fa fa-id-badge float-right"></i>
-                  {props.user?.userId}
+                <li className="list-group-item d-flex justify-content-between">
+                  <div> {props.user?.userId}</div>
+                  <FaPortrait />
                 </li>
-                <li className="list-group-item">
-                  <i className="fa fa-envelope float-right"></i>
-                  {props.user?.email}
+                <li className="list-group-item d-flex justify-content-between">
+                  <div>{props.user?.email}</div>
+                  <FaEnvelope />
                 </li>
-                <li className="list-group-item">
-                  <i className="fas fa-shield-alt float-right"></i>Role
+                <li className="list-group-item d-flex justify-content-between">
+                  <div>{props.user?.role}</div>
+                  <FaShieldAlt />
                 </li>
-                <li className="list-group-item">
-                  <i className="fas fa-sign-in-alt float-right"></i>
-                  {props.user?.lastLoginDateDisplay?.toDateString()}
-                </li>
-                <li className="list-group-item">
-                  <span>
-                    <FaLock />
-                    Account Locked
-                  </span>
-                  <span>
-                    <FaUnlock className="ml-2" />
-                    Account Unlocked
-                  </span>
+                <li className="list-group-item ">
+                  {props.user?.notLocked ? (
+                    <div className="d-flex">
+                      <div>Account Locked</div>
+                      <FaLock color="#dc3545" className="ml-auto" />
+                    </div>
+                  ) : (
+                    <div className="d-flex">
+                      <div>Account Unlocked</div>
+                      <FaUnlock color="#28a745" className="ml-auto" />
+                    </div>
+                  )}
                 </li>
               </ul>
             </div>
@@ -106,6 +126,7 @@ const UserInfoModal: FC<Props> = (props) => {
             type="button"
             className="btn btn-secondary"
             data-dismiss="modal"
+            onClick={props.handleClose}
           >
             Close
           </button>

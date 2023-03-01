@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Container } from "react-bootstrap";
-import { FaEdit, FaPlus, FaTrash } from "react-icons/fa";
+import { FaEdit, FaExclamation, FaPlus, FaTrash } from "react-icons/fa";
 import AddNewUserModal from "../components/AddNewUserModal";
 import EditUserModal from "../components/EditUserModal";
 import LoadingIndicator from "../components/LoadingIndicator";
 import UserInfoModal from "../components/UserInfoModal";
 import User from "../models/User";
 import UserService from "../service/UserServices";
+import Notification from "./../components/Notification";
 
 const Dashboard = () => {
   const [show, setShow] = useState(false);
@@ -52,6 +53,12 @@ const Dashboard = () => {
     const idx = usersClone.map((u) => u.username).indexOf(user.username);
     usersClone[idx] = user;
     setData((ps) => ({ ...ps, users: usersClone }));
+  };
+
+  const removeUserFromList = (username: string) => {
+    const usersClone = [...data.users];
+    const updatedList = usersClone.filter((val) => val.username !== username);
+    setData((ps) => ({ ...ps, users: updatedList }));
   };
 
   const setAddNewUser = (user: User) => {
@@ -122,8 +129,9 @@ const Dashboard = () => {
                         ...ps,
                         selectedUser: user,
                       }));
-                      setUserInfoModal(true);
+                      handleUserInfoModallShow();
                     }}
+                    style={{ fontWeight: 400 }}
                   >
                     <td>
                       <img
@@ -143,12 +151,7 @@ const Dashboard = () => {
                       {user.active ? (
                         <span className="badge badge-success">Active</span>
                       ) : (
-                        <></>
-                      )}
-                      {user.notLocked ? (
                         <span className="badge badge-danger">Inactive</span>
-                      ) : (
-                        <></>
                       )}
                     </td>
                     <td className="">
@@ -168,7 +171,27 @@ const Dashboard = () => {
                         </button>
                         <button
                           className="btn btn-outline-danger"
-                          onClick={() => {}}
+                          onClick={(e) => {
+                            isLoadingHandler(true);
+                            UserService.deleteUser(user.username)
+                              .then((res) => {
+                                isLoadingHandler(false);
+                                removeUserFromList(user.username);
+                                Notification({
+                                  isSuccess: true,
+                                  message: "Deleted user successfully",
+                                });
+                              })
+                              .catch(() => {
+                                isLoadingHandler(false);
+                                Notification({
+                                  isSuccess: false,
+                                  message: "Failed to delete user",
+                                  icon: FaExclamation,
+                                });
+                              });
+                            e.stopPropagation();
+                          }}
                         >
                           <FaTrash />
                         </button>

@@ -16,7 +16,7 @@ import AuthService from "../service/AuthService";
 import { useLocalStorage } from "./useLocalStorage";
 
 type authContextType = {
-  user: any;
+  user: User | null;
   setAppUser: (creds: User) => void;
   login: (data: LoginCredentials) => Promise<AxiosResponse<any, any>>;
   logout: () => void;

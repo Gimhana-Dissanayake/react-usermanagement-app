@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
+import { FaExclamation } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import User from "../models/User";
 import AuthService from "../service/AuthService";
+import Notification from "./../components/Notification";
 
 const Login = () => {
   const AUTH = useAuth();
@@ -16,14 +18,12 @@ const Login = () => {
   const passwordChangeHandler = (value: string) => {
     setState((ps) => ({ ...ps, password: value }));
   };
+
   const loginHandler = async () => {
     const creds = { username: state.username, password: state.password };
 
     try {
       const response = await AUTH.login(creds);
-
-      console.log("DATA ", response.data);
-      console.log("HEADER ");
 
       const token = response.headers["jwt-token"];
       const user: User = { ...response.data, token: token };
@@ -31,9 +31,49 @@ const Login = () => {
       AUTH.setAppUser(user);
       AuthService.setUpAxiosInterceptors(user);
       navigate("/auth/dashboard", { replace: true });
-    } catch (e) {
-      console.log("ERROR");
+    } catch (e: any) {
+      console.log("ERRROR ", e);
+
+      Notification({
+        isSuccess: false,
+        message: "Invalid credentials",
+        icon: FaExclamation,
+      });
     }
+  };
+
+  const [isTouched, setIsTouched] = useState({
+    username: "",
+    password: "",
+  });
+
+  const setIsTouchedOnBlurHandler = (
+    e: React.FocusEvent<HTMLInputElement, Element>
+  ) => {
+    let text = "";
+    if (e.target.name === "username" && !e.target.value) {
+      text = "Please enter username";
+    } else if (e.target.name === "password" && !e.target.value) {
+      text = "Please enter password";
+    }
+
+    setIsTouched((ps: any) => ({
+      ...ps,
+      [e.target.name]: text,
+    }));
+  };
+
+  const setIsTouchedOnFocusHandler = (
+    e: React.FocusEvent<HTMLInputElement, Element>
+  ) => {
+    setIsTouched((ps: any) => ({
+      ...ps,
+      [e.target.name]: "",
+    }));
+  };
+
+  const isFormValid = () => {
+    return state.username && state.password;
   };
 
   return (
@@ -70,9 +110,16 @@ const Login = () => {
                   onChange={(e) => {
                     usernameChangeHandler(e.target.value);
                   }}
+                  onFocus={setIsTouchedOnFocusHandler}
+                  onBlur={setIsTouchedOnBlurHandler}
                 />
+                {isTouched.username ? (
+                  <div className="text-danger mt-1">{isTouched.username}</div>
+                ) : (
+                  <></>
+                )}
               </div>
-              <span style={{ color: "red" }}>Please enter a User Name</span>
+
               <div className="mb-2 mt-3">
                 <input
                   type="password"
@@ -84,15 +131,24 @@ const Login = () => {
                   onChange={(e) => {
                     passwordChangeHandler(e.target.value);
                   }}
+                  onFocus={setIsTouchedOnFocusHandler}
+                  onBlur={setIsTouchedOnBlurHandler}
                 />
+                {isTouched.password ? (
+                  <div className="text-danger mt-1">{isTouched.password}</div>
+                ) : (
+                  <></>
+                )}
               </div>
-              <span style={{ color: "red" }}>Please enter password</span>
+
               <div className="text-center">
                 <button
                   type="submit"
-                  className="btn px-5 mb-3 w-100 btn-primary mt-4"
+                  className={`btn px-5 mb-3 w-100 btn-primary mt-4 ${
+                    !isFormValid() && "disabled"
+                  }`}
                 >
-                  <i className="fas fa-spinner fa-spin mr-2"></i>Login
+                  Login
                 </button>
               </div>
               <div

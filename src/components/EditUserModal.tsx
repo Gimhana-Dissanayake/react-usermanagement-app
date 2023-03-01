@@ -1,7 +1,7 @@
 import React, { FC, useEffect, useState } from "react";
 import { Modal } from "react-bootstrap";
 import { UpdateUserDTO } from "../dtos/UpdateUserDTO";
-import User from "../models/User";
+import User, { initUser } from "../models/User";
 import UserServices from "./../service/UserServices";
 interface Props {
   user: User | null;
@@ -12,11 +12,43 @@ interface Props {
 }
 
 const EditUserModal: FC<Props> = (props) => {
-  const [state, setState] = useState<User | null>(props.user);
+  const [state, setState] = useState<User>(initUser);
 
-  useEffect(() => {
-    setState(props.user);
-  }, [props.user]);
+  const [isTouched, setIsTouched] = useState({
+    firstName: "",
+    lastName: "",
+    username: "",
+    email: "",
+  });
+
+  const setIsTouchedOnBlurHandler = (
+    e: React.FocusEvent<HTMLInputElement, Element>
+  ) => {
+    let text = "";
+    if (e.target.name === "firstName" && !e.target.value) {
+      text = "First Name cannot be empty";
+    } else if (e.target.name === "lastName" && !e.target.value) {
+      text = "Last Name cannot be empty";
+    } else if (e.target.name === "username" && !e.target.value) {
+      text = "Username cannot be empty";
+    } else if (e.target.name === "email" && !e.target.value) {
+      text = "Email cannot be empty";
+    }
+
+    setIsTouched((ps: any) => ({
+      ...ps,
+      [e.target.name]: text,
+    }));
+  };
+
+  const setIsTouchedOnFocusHandler = (
+    e: React.FocusEvent<HTMLInputElement, Element>
+  ) => {
+    setIsTouched((ps: any) => ({
+      ...ps,
+      [e.target.name]: "",
+    }));
+  };
 
   const stateInputHandler = (
     e:
@@ -29,12 +61,33 @@ const EditUserModal: FC<Props> = (props) => {
     }));
   };
 
+  const isFormValid = () => {
+    return (
+      isValidEmail() &&
+      state.firstName &&
+      state.lastName &&
+      state.username &&
+      state.role
+    );
+  };
+
+  const isValidEmail = () => {
+    let validRegex =
+      /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+
+    return state.email.match(validRegex);
+  };
+
   const checkboxInputHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     setState((ps: any) => ({
       ...ps,
       [e.target.name]: e.target.checked,
     }));
   };
+
+  useEffect(() => {
+    props.user && setState(props.user);
+  }, [props.user]);
 
   const submitHandler = () => {
     if (state) {
@@ -90,7 +143,14 @@ const EditUserModal: FC<Props> = (props) => {
                   className="form-control"
                   value={state?.firstName}
                   onChange={stateInputHandler}
+                  onFocus={setIsTouchedOnFocusHandler}
+                  onBlur={setIsTouchedOnBlurHandler}
                 />
+                {isTouched.firstName ? (
+                  <div className="text-danger mt-1">{isTouched.firstName}</div>
+                ) : (
+                  <></>
+                )}
               </div>
               <div className="form-group">
                 <label htmlFor="lastName">Last Name</label>
@@ -100,7 +160,14 @@ const EditUserModal: FC<Props> = (props) => {
                   className="form-control"
                   value={state?.lastName}
                   onChange={stateInputHandler}
+                  onFocus={setIsTouchedOnFocusHandler}
+                  onBlur={setIsTouchedOnBlurHandler}
                 />
+                {isTouched.lastName ? (
+                  <div className="text-danger mt-1">{isTouched.lastName}</div>
+                ) : (
+                  <></>
+                )}
               </div>
               <div className="form-group">
                 <label htmlFor="username">Username</label>
@@ -110,7 +177,14 @@ const EditUserModal: FC<Props> = (props) => {
                   className="form-control"
                   value={state?.username}
                   onChange={stateInputHandler}
+                  onFocus={setIsTouchedOnFocusHandler}
+                  onBlur={setIsTouchedOnBlurHandler}
                 />
+                {isTouched.username ? (
+                  <div className="text-danger mt-1">{isTouched.username}</div>
+                ) : (
+                  <></>
+                )}
               </div>
               <div className="form-group">
                 <label htmlFor="email">Email</label>
@@ -120,7 +194,14 @@ const EditUserModal: FC<Props> = (props) => {
                   className="form-control"
                   value={state?.email}
                   onChange={stateInputHandler}
+                  onFocus={setIsTouchedOnFocusHandler}
+                  onBlur={setIsTouchedOnBlurHandler}
                 />
+                {isTouched.email && !isValidEmail() ? (
+                  <div className="text-danger mt-1">{isTouched.email}</div>
+                ) : (
+                  <></>
+                )}
               </div>
               <div className="form-group">
                 <label htmlFor="authority">Role</label>
@@ -198,10 +279,12 @@ const EditUserModal: FC<Props> = (props) => {
           </button>
           <button
             type="button"
-            className="btn btn-primary"
+            className={`btn btn-primary ${!isFormValid() && "disabled"}`}
             onClick={() => {
-              submitHandler();
-              props.handleClose();
+              if (isFormValid()) {
+                submitHandler();
+                props.handleClose();
+              }
             }}
           >
             Save changes

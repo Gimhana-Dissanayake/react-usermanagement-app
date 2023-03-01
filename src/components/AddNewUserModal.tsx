@@ -16,7 +16,7 @@ const init: AddNewUserDTO = {
   lastName: "",
   username: "",
   email: "",
-  role: "",
+  role: "USER",
   profileImage: "",
   isActive: false,
   isNotLocked: false,
@@ -24,12 +24,48 @@ const init: AddNewUserDTO = {
 
 const AddNewUserModal: FC<Props> = (props) => {
   const [state, setState] = useState<AddNewUserDTO>(init);
+  const [isTouched, setIsTouched] = useState({
+    firstName: "",
+    lastName: "",
+    username: "",
+    email: "",
+  });
+
+  const setIsTouchedOnBlurHandler = (
+    e: React.FocusEvent<HTMLInputElement, Element>
+  ) => {
+    let text = "";
+    if (e.target.name === "firstName" && !e.target.value) {
+      text = "First Name cannot be empty";
+    } else if (e.target.name === "lastName" && !e.target.value) {
+      text = "Last Name cannot be empty";
+    } else if (e.target.name === "username" && !e.target.value) {
+      text = "Username cannot be empty";
+    } else if (e.target.name === "email" && !e.target.value) {
+      text = "Email cannot be empty";
+    }
+
+    setIsTouched((ps: any) => ({
+      ...ps,
+      [e.target.name]: text,
+    }));
+  };
+
+  const setIsTouchedOnFocusHandler = (
+    e: React.FocusEvent<HTMLInputElement, Element>
+  ) => {
+    setIsTouched((ps: any) => ({
+      ...ps,
+      [e.target.name]: "",
+    }));
+  };
 
   const stateInputHandler = (
     e:
       | React.ChangeEvent<HTMLInputElement>
       | React.ChangeEvent<HTMLSelectElement>
   ) => {
+    console.log("FSDF");
     setState((ps: any) => ({
       ...ps,
       [e.target.name]: e.target.value,
@@ -44,32 +80,45 @@ const AddNewUserModal: FC<Props> = (props) => {
   };
 
   const submitHandler = () => {
-    if (state) {
-      props.isLoadingHandler(true);
-      const addNewUserDTO: AddNewUserDTO = {
-        firstName: state.firstName,
-        lastName: state.lastName,
-        username: state.username,
-        email: state.email,
-        role: state.role,
-        profileImage: state.profileImage,
-        isActive: state.isActive,
-        isNotLocked: state.isNotLocked,
-      };
-      UserServices.addUser(addNewUserDTO)
-        .then((val) => {
-          props.setAddNewUser(val.data);
-        })
-        .catch(() => {
-          console.log("ERROR");
-        })
-        .finally(() => {
-          props.isLoadingHandler(false);
-        });
-    }
+    props.isLoadingHandler(true);
+    const addNewUserDTO: AddNewUserDTO = {
+      firstName: state.firstName,
+      lastName: state.lastName,
+      username: state.username,
+      email: state.email,
+      role: state.role,
+      profileImage: state.profileImage,
+      isActive: state.isActive,
+      isNotLocked: state.isNotLocked,
+    };
+    UserServices.addUser(addNewUserDTO)
+      .then((val) => {
+        props.setAddNewUser(val.data);
+      })
+      .catch(() => {
+        console.log("ERROR");
+      })
+      .finally(() => {
+        props.isLoadingHandler(false);
+      });
   };
 
-  console.log("STATE STATE ", state);
+  const isFormValid = () => {
+    return (
+      isValidEmail() &&
+      state.firstName &&
+      state.lastName &&
+      state.username &&
+      state.role
+    );
+  };
+
+  const isValidEmail = () => {
+    let validRegex =
+      /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+
+    return state.email.match(validRegex);
+  };
 
   return (
     <Modal show={props.show} onHide={props.handleClose}>
@@ -98,7 +147,14 @@ const AddNewUserModal: FC<Props> = (props) => {
                   className="form-control"
                   value={state?.firstName}
                   onChange={stateInputHandler}
+                  onFocus={setIsTouchedOnFocusHandler}
+                  onBlur={setIsTouchedOnBlurHandler}
                 />
+                {isTouched.firstName ? (
+                  <div className="text-danger mt-1">{isTouched.firstName}</div>
+                ) : (
+                  <></>
+                )}
               </div>
               <div className="form-group">
                 <label htmlFor="lastName">Last Name</label>
@@ -108,7 +164,14 @@ const AddNewUserModal: FC<Props> = (props) => {
                   className="form-control"
                   value={state?.lastName}
                   onChange={stateInputHandler}
+                  onFocus={setIsTouchedOnFocusHandler}
+                  onBlur={setIsTouchedOnBlurHandler}
                 />
+                {isTouched.lastName ? (
+                  <div className="text-danger mt-1">{isTouched.lastName}</div>
+                ) : (
+                  <></>
+                )}
               </div>
               <div className="form-group">
                 <label htmlFor="username">Username</label>
@@ -118,7 +181,14 @@ const AddNewUserModal: FC<Props> = (props) => {
                   className="form-control"
                   value={state?.username}
                   onChange={stateInputHandler}
+                  onFocus={setIsTouchedOnFocusHandler}
+                  onBlur={setIsTouchedOnBlurHandler}
                 />
+                {isTouched.username ? (
+                  <div className="text-danger mt-1">{isTouched.username}</div>
+                ) : (
+                  <></>
+                )}
               </div>
               <div className="form-group">
                 <label htmlFor="email">Email</label>
@@ -128,7 +198,14 @@ const AddNewUserModal: FC<Props> = (props) => {
                   className="form-control"
                   value={state?.email}
                   onChange={stateInputHandler}
+                  onFocus={setIsTouchedOnFocusHandler}
+                  onBlur={setIsTouchedOnBlurHandler}
                 />
+                {isTouched.email && !isValidEmail() ? (
+                  <div className="text-danger mt-1">{isTouched.email}</div>
+                ) : (
+                  <></>
+                )}
               </div>
               <div className="form-group">
                 <label htmlFor="authority">Role</label>
@@ -203,10 +280,12 @@ const AddNewUserModal: FC<Props> = (props) => {
           </button>
           <button
             type="button"
-            className="btn btn-primary"
+            className={`btn btn-primary ${!isFormValid() && "disabled"}`}
             onClick={() => {
-              submitHandler();
-              props.handleClose();
+              if (isFormValid()) {
+                submitHandler();
+                props.handleClose();
+              }
             }}
           >
             Save changes
@@ -216,5 +295,33 @@ const AddNewUserModal: FC<Props> = (props) => {
     </Modal>
   );
 };
+
+// let firstName = "";
+// let lastName = "";
+// let username = "";
+// let email = "";
+
+// if (isFormValid()) {
+//   if (!state.firstName) {
+//     firstName = "First Name cannot be empty";
+//   }
+//   if (!state.lastName) {
+//     lastName = "Last Name cannot be empty";
+//   }
+//   if (!state.username) {
+//     username = "Username cannot be empty";
+//   }
+//   if (!state.email) {
+//     email = "Email cannot be empty";
+//   }
+
+//   return setIsTouched((ps: any) => ({
+//     ...ps,
+//     firstName,
+//     lastName,
+//     username,
+//     email,
+//   }));
+// }
 
 export default AddNewUserModal;
