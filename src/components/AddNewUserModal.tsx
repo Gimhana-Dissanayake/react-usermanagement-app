@@ -1,22 +1,29 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useState } from "react";
 import { Modal } from "react-bootstrap";
-import { UpdateUserDTO } from "../dtos/UpdateUserDTO";
+import { AddNewUserDTO } from "../dtos/AddNewUserDTO";
 import User from "../models/User";
-import UserServices from "./../service/UserServices";
+import UserServices from "../service/UserServices";
+
 interface Props {
-  user: User | null;
   show: boolean;
   handleClose: () => void;
-  setUpdateUser: (user: User) => void;
   isLoadingHandler: (value: boolean) => void;
+  setAddNewUser: (user: User) => void;
 }
 
-const EditUserModal: FC<Props> = (props) => {
-  const [state, setState] = useState<User | null>(props.user);
+const init: AddNewUserDTO = {
+  firstName: "",
+  lastName: "",
+  username: "",
+  email: "",
+  role: "",
+  profileImage: "",
+  isActive: false,
+  isNotLocked: false,
+};
 
-  useEffect(() => {
-    setState(props.user);
-  }, [props.user]);
+const AddNewUserModal: FC<Props> = (props) => {
+  const [state, setState] = useState<AddNewUserDTO>(init);
 
   const stateInputHandler = (
     e:
@@ -39,20 +46,19 @@ const EditUserModal: FC<Props> = (props) => {
   const submitHandler = () => {
     if (state) {
       props.isLoadingHandler(true);
-      const updateUserDTO: UpdateUserDTO = {
-        currentUsername: state.username,
+      const addNewUserDTO: AddNewUserDTO = {
         firstName: state.firstName,
         lastName: state.lastName,
         username: state.username,
         email: state.email,
         role: state.role,
-        profileImage: state.profileImageUrl,
-        isActive: state.active,
-        isNotLocked: state.notLocked,
+        profileImage: state.profileImage,
+        isActive: state.isActive,
+        isNotLocked: state.isNotLocked,
       };
-      UserServices.updateUser(updateUserDTO)
+      UserServices.addUser(addNewUserDTO)
         .then((val) => {
-          props.setUpdateUser(val.data);
+          props.setAddNewUser(val.data);
         })
         .catch(() => {
           console.log("ERROR");
@@ -63,11 +69,13 @@ const EditUserModal: FC<Props> = (props) => {
     }
   };
 
+  console.log("STATE STATE ", state);
+
   return (
     <Modal show={props.show} onHide={props.handleClose}>
       <div className="modal-content">
         <div className="modal-header">
-          <h5 className="modal-title text-center">Edit First Name Last Name</h5>
+          <h5 className="modal-title text-center">New User</h5>
           <button
             type="button"
             className="close"
@@ -80,7 +88,7 @@ const EditUserModal: FC<Props> = (props) => {
           </button>
         </div>
         <div className="modal-body">
-          <div className="">
+          <div>
             <form>
               <div className="form-group">
                 <label htmlFor="firstName">First Name</label>
@@ -136,6 +144,7 @@ const EditUserModal: FC<Props> = (props) => {
                   <option value="ROLE_SUPER_ADMIN">SUPER ADMIN</option>
                 </select>
               </div>
+
               {/* <div className="input-group mb-2">
                 <div className="input-group-prepend">
                   <span className="input-group-text">Profile Picture </span>
@@ -144,15 +153,11 @@ const EditUserModal: FC<Props> = (props) => {
                   <input
                     type="file"
                     accept="image/*"
-                    name="profileImageUrl"
+                    name="profileImage"
                     className="custom-file-input"
-                    onChange={(e) => {
-                      setFile(fileRef?.current?.files[0]);
-                      setFileHandler(e);
-                    }}
-                    ref={fileRef}
                   />
                   <label className="custom-file-label">
+                    <span>FirstName</span>
                     <span>Choose File</span>
                   </label>
                 </div>
@@ -161,11 +166,11 @@ const EditUserModal: FC<Props> = (props) => {
                 <div className="form-check">
                   <label className="form-check-label">
                     <input
-                      name="active"
                       type="checkbox"
+                      name="isActive"
                       className="form-check-input"
                       onChange={checkboxInputHandler}
-                      checked={state?.active}
+                      checked={state?.isActive}
                     />
                     Acitve
                   </label>
@@ -173,11 +178,11 @@ const EditUserModal: FC<Props> = (props) => {
                 <div className="form-check disabled">
                   <label className="form-check-label">
                     <input
-                      name="notLocked"
                       type="checkbox"
+                      name="isNotLocked"
                       className="form-check-input"
                       onChange={checkboxInputHandler}
-                      checked={state?.notLocked}
+                      checked={state?.isNotLocked}
                     />
                     Unlocked
                   </label>
@@ -191,7 +196,7 @@ const EditUserModal: FC<Props> = (props) => {
             type="button"
             className="btn btn-secondary"
             data-dismiss="modal"
-            id="closeEditUserModalButton"
+            id="new-user-close"
             onClick={props.handleClose}
           >
             Close
@@ -212,4 +217,4 @@ const EditUserModal: FC<Props> = (props) => {
   );
 };
 
-export default EditUserModal;
+export default AddNewUserModal;

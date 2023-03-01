@@ -8,7 +8,6 @@ import {
 } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  AppUser,
   LoginCredentials,
   USER_NAME_SESSION_ATTRIBUTE_NAME,
 } from "../constants";
@@ -18,7 +17,7 @@ import { useLocalStorage } from "./useLocalStorage";
 
 type authContextType = {
   user: any;
-  setAppUser: (creds: AppUser) => void;
+  setAppUser: (creds: User) => void;
   login: (data: LoginCredentials) => Promise<AxiosResponse<any, any>>;
   logout: () => void;
 };
@@ -45,7 +44,7 @@ export const AuthProvider = ({ children }: Props) => {
   );
   const navigate = useNavigate();
 
-  const setAppUser = (data: AppUser) => {
+  const setAppUser = (data: User) => {
     setUser(data);
   };
 

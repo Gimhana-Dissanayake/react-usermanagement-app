@@ -1,18 +1,33 @@
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
+import { AddNewUserDTO } from "../dtos/AddNewUserDTO";
+import { UpdateUserDTO } from "../dtos/UpdateUserDTO";
 import { environment } from "../environments/env";
 import User from "../models/User";
 
 class UserService {
   private host = environment.apiUrl;
 
-  public getUsers(): Promise<User[]> {
-    return axios.get(`${this.host}/user/list`, {
-      headers: {
-        Authorization:
-          "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJhdWQiOiJVc2VyIE1hbmFnZW1lbnQgUG9ydGFsIiwic3ViIjoiYXNpdGgiLCJpc3MiOiJHZXQgQXJyYXlzLCBMTEMiLCJleHAiOjE2Nzc5NjA1MTAsImlhdCI6MTY3NzUyODUxMCwiYXV0aG9yaXRpZXMiOlsidXNlcjpyZWFkIiwidXNlcjpjcmVhdGUiLCJ1c2VyOnVwZGF0ZSJdfQ.cKniuUFOn5RgPqgHilcZ598hGlvWvUlydve2d_6v8NuIa1tKpKMDqyArfm3U1IPke6U_mFpll0_YyupHQoVMyQ",
-      },
+  public getUsers(): Promise<{ data: User[] }> {
+    return axios.get(`${this.host}/user/list`);
+  }
+
+  public updateUser(
+    updateUserDTO: UpdateUserDTO
+  ): Promise<AxiosResponse<User, any>> {
+    return axios.post(`${this.host}/user/update`, null, {
+      params: updateUserDTO,
     });
   }
+
+  public addUser(user: AddNewUserDTO): Promise<AxiosResponse<User, any>> {
+    return axios.post(`${this.host}/user/add`, null, { params: user });
+  }
+
+  // public updateUser(user: any): Promise<any> {
+  //   return axios.post(`${this.host}/user/update`, null, {
+  //     params: { currentUsername: user.currentUsername },
+  //   });
+  // }
 }
 
 const userService = new UserService();

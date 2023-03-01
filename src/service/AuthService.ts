@@ -1,17 +1,19 @@
 import axios from "axios";
-import { AppUser, BASE_URL, LoginCredentials } from "../constants";
+import { BASE_URL, LoginCredentials } from "../constants";
 import User from "../models/User";
 
 class AuthService {
-  setUpAxiosInterceptors(user: AppUser) {
-    let token = this.createJwtToken(user.token);
+  setUpAxiosInterceptors(user: User) {
+    if (user?.token) {
+      let token = this.createJwtToken(user.token);
 
-    axios.interceptors.request.use((config) => {
-      if (user && config.headers) {
-        config.headers.authorization = token;
-      }
-      return config;
-    });
+      axios.interceptors.request.use((config) => {
+        if (user && config.headers) {
+          config.headers.authorization = token;
+        }
+        return config;
+      });
+    }
   }
 
   createJwtToken(token?: string | null) {

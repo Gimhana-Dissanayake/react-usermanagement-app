@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./App.css";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./hooks/useAuth";
@@ -11,8 +11,16 @@ import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
 import { HomeLayout } from "./layouts/HomeLayout";
 import { ProtectedLayout } from "./layouts/ProtectedLayout";
+import User from "./models/User";
+import AuthService from "./service/AuthService";
 
 function App() {
+  useEffect(() => {
+    const value = localStorage.getItem("todoAuthUser");
+    const user = JSON.parse(value!) as User;
+    AuthService.setUpAxiosInterceptors(user);
+  }, []);
+
   return (
     <AuthProvider>
       <Routes>

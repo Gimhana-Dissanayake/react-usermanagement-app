@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
-import { AppUser } from "../constants";
 import { useAuth } from "../hooks/useAuth";
+import User from "../models/User";
 import AuthService from "../service/AuthService";
 
 const Login = () => {
@@ -26,7 +26,7 @@ const Login = () => {
       console.log("HEADER ");
 
       const token = response.headers["jwt-token"];
-      const user: AppUser = { ...response.data, token: token };
+      const user: User = { ...response.data, token: token };
 
       AUTH.setAppUser(user);
       AuthService.setUpAxiosInterceptors(user);

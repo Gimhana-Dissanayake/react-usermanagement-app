@@ -13,6 +13,7 @@ interface User {
   role: string;
   authorities: [];
   token?: string;
+  currentUsername?: string;
 }
 
 export default User;
